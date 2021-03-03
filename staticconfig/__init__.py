@@ -78,7 +78,7 @@ class Config(Namespace):
         if not os.path.exists(config_file):
             with open(config_file, "w") as fh:
                 json.dump(cls(), fh, indent=2)
-                raise ConfigError(f"{config_file} not found, generated template")
+                raise ConfigError(config_file+" not found, generated template")
         with open(config_file) as f:
             dct = json.load(f)
         cls.config_path = config_file
@@ -101,7 +101,7 @@ class Config(Namespace):
     def _update(dct, dct2):
         for key, value in dct2.items():
             if key not in dct:
-                raise ConfigError(f"Unexpected config option: '{key}'")
+                raise ConfigError("Unexpected config option: '"+key+"'")
             elif isinstance(value, dict):
                 Config._update(dct[key], value)
             else:
