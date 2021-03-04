@@ -70,9 +70,8 @@ class Config(Namespace):
         :rtype: Config
         """
         if not os.path.exists(config_file):
-            with open(config_file, "w") as fh:
-                json.dump(cls(), fh, indent=2)
-                raise ConfigError(config_file+" not found, generated template")
+            cls.to_json(cls(), config_file)
+            raise ConfigError(config_file+" not found, generated template")
         with open(config_file) as f:
             dct = json.load(f)
         cls.config_path = config_file
