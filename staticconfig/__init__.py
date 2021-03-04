@@ -42,9 +42,6 @@ class Config(Namespace):
     - Use `Namespace` objects to create sections.
     """
 
-    def __init__(self):
-        super().__init__()
-
     @classmethod
     def from_dict(cls, dct: Dict[str, Any]) -> "Config":
         """
@@ -63,6 +60,7 @@ class Config(Namespace):
     def from_json(cls, config_file: str) -> "Config":
         """
         Load a json file and create a config instance from it.
+        If the specified file doesn't exists create one and quit the program.
 
         :param config_file: path to json file to load
         :type config_file: str
@@ -70,29 +68,39 @@ class Config(Namespace):
         :rtype: Config
         """
         if not os.path.exists(config_file):
-            cls.to_json(cls(), config_file)
-            raise ConfigError(config_file+" not found, generated template")
-        with open(config_file) as f:
-            dct = json.load(f)
-        cls.config_path = config_file
-        return cls.from_dict(dct)
+            config = cls()
+            config.to_json(config_file)
+            config.quit(config_file+" not found, generated template")
 
-    @classmethod
-    def to_json(cls, config: "Config", config_file: str):
+            # This return is only reached when quit is overwritten in subclass
+            return config
+
+        else:
+            with open(config_file) as f:
+                dct = json.load(f)
+            return cls.from_dict(dct)
+
+    def to_json(self, config_file: str) -> None:
         """
         Dump a Config to a specified path as json.
 
-        :param config: Existing Config object
-        :type config: Config
         :param config_file: Path to json file
         :type config_file: str
         """
         with open(config_file, "w") as fh:
-            json.dump(config, fh, indent=2, sort_keys=True)
             # Use sort keys to ensure deterministic config files
+            json.dump(self, fh, indent=2, sort_keys=True)
 
     @staticmethod
-    def _update(dct, dct2):
+    def _update(dct: dict, dct2: dict) -> None:
+        """
+        Update a dictionary recursively
+
+        :param dct: dictionary to update
+        :type dct: dict
+        :param dct2: dictionary providing the new data
+        :type dct2: dict
+        """
         for key, value in dct2.items():
             if key not in dct:
                 raise ConfigError("Unexpected config option: '"+key+"'")
@@ -100,3 +108,16 @@ class Config(Namespace):
                 Config._update(dct[key], value)
             else:
                 dct[key] = value
+
+    @staticmethod
+    def quit(msg: str) -> None:
+        """
+        This function is called after a new config file has being created.
+        It stops the program, because the user should first have a look and the config before proceeding.
+
+        It can be overwritten in subclasses for custom behaviour.
+        :param msg: A message to print before quitting
+        :type msg: string
+        """
+        print(msg)
+        quit(0)
