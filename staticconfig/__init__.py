@@ -89,7 +89,8 @@ class Config(Namespace):
         :type config_file: str
         """
         with open(config_file, "w") as fh:
-            json.dump(config, fh, indent=2)
+            json.dump(config, fh, indent=2, sort_keys=True)
+            # Use sort keys to ensure deterministic config files
 
     @staticmethod
     def _update(dct, dct2):
