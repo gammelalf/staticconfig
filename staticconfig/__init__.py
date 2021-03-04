@@ -12,22 +12,25 @@ class ConfigError(RuntimeError):
 class Namespace(dict):
     """
     A namespace is a python dict whose values can be accessed like attributes.
+    It ensures that its keys are identifier strings.
+    When an uninitialised key is accessed, it will be initialised with a new empty Namespace object.
 
-    It also ensures that its keys are identifier strings.
     The point is solely to have nicer syntax.
     """
 
     def __getattr__(self, key):
-        return self.__getitem__(key)
+        return self.setdefault(key, Namespace())
 
     def __setattr__(self, key, value):
         self.__setitem__(key, value)
 
     def __setitem__(self, key, value):
-        if isinstance(key, str) and key.isidentifier():
-            super().__setitem__(key, value)
+        if not isinstance(key, str):
+            raise TypeError("Key must be string")
+        elif not key.isidentifier():
+            raise ValueError("Key must be valid identifier")
         else:
-            raise KeyError("Key must be identifier strings")
+            super().__setitem__(key, value)
 
 
 class Config(Namespace):
