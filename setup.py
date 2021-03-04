@@ -5,7 +5,7 @@ with open("README.md") as f:
 
 setuptools.setup(
     name="staticconfig",
-    version="0.0.4",
+    version="0.0.5",
     author="Wolfgang Fischer",
     author_email="31348226+gammelalf@users.noreply.github.com",
     description="Json config files with a statically defined structure.",
